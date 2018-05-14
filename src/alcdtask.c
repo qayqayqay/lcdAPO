@@ -20,6 +20,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "display.h"
+#include <string.h>
 
 #include "mzapo_parlcd.h"
 #include "mzapo_phys.h"
@@ -32,6 +33,8 @@ int main(int argc, char *argv[])
 	
   int i, j, offX, offY;
   unsigned c;
+  int NoUnits = 4;
+  int selection;
 
   unsigned char *mem_base;
 
@@ -101,8 +104,16 @@ int main(int argc, char *argv[])
   //writeLetter(53, 120, 120); 
   
   printf("Hello world\n");
-  writeText("extremne dlouhy text, ktery urcite musi vypsat na vice nez jeden radek, aspon doufam teda", 120,120);
+  //writeText("extremne dlouhy text, ktery urcite musi vypsat na vice nez jeden radek, aspon doufam teda", 120,120);
   
+  //added writing units
+  int it;
+  char unit[11];
+  for(it = 0; it < NoUnits; it++){
+	  sprintf(unit, "Jednotka %d", it+1);
+	  writeText(unit, 0, it*16);
+  }
+  writeText("Pridat jednotku", 0, it*16);
   grafShow();
   sleep(4);
 
