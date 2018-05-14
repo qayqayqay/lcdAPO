@@ -28,7 +28,6 @@ for (i = 0; i < 320 ; i++) {
 
 void grafShow(){
 	int i,j;
-	grafika = sectorUnit+sectorOptions + sectorParams; 
 	for (i = 0; i < 320 ; i++) {
 		for (j = 0; j < 480 ; j++) {
 			parlcd_write_data(parlcd_mem_base, grafika[i][j]);

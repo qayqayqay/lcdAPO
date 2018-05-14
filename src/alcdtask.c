@@ -29,13 +29,22 @@
 
 unsigned char *parlcd_mem_base;
 
+struct Unit {
+	int number;
+	char name[16];
+	uint32_t ceiling;
+	uint32_t wall;
+	uint16_t graphics[16][16];
+};
+
 int main(int argc, char *argv[])
 {
 	
-  int i, j, offX, offY;
-  unsigned c;
+  //int i, j, offX, offY;
+  //unsigned c;
   int NoUnits = 4;
   //int selection = 1;
+  uint32_t rgb_knobs_value;
 
   unsigned char *mem_base;
 
@@ -49,75 +58,30 @@ int main(int argc, char *argv[])
   parlcd_hx8357_init(parlcd_mem_base);
 
   parlcd_write_cmd(parlcd_mem_base, 0x2c);
-  for (i = 0; i < 320 ; i++) {
-    for (j = 0; j < 480 ; j++) {
-      c = 0;
-      parlcd_write_data(parlcd_mem_base, c);
-    }
-  }
 
-  while(0)
-  {
-  uint32_t rgb_knobs_value;
-
-  rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
-
-  offX  = 160 +(rgb_knobs_value & 0x1f);
-  offY = 240;
-  printf("offX %d \n",offX);
-  
-  parlcd_write_cmd(parlcd_mem_base, 0x2c);
-  for (i = 0; i < 320 ; i++) {
-    for (j = 0; j < 480 ; j++) {
-      if(((i-offX)*(i-offX))+((j-offY)*(j-offY)) < 4000){
-	  c = 0xffff;
-	  } else {
-	  c = 0x0;
-	  }
-      
-      /*c = ((i & 0x1f) << 11) | (j & 0x1f);
-      if (i < 10)
-        c |= 0x3f << 5;
-      if (j < 10)
-        c |= 0x3f << 5;*/
-      parlcd_write_data(parlcd_mem_base, c);
-    }
-  }
-
-  while (0) {
-     struct timespec loop_delay = {.tv_sec = 0, .tv_nsec = 200 * 1000 * 1000};
-
-     *(volatile uint16_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0001;
-     *(volatile uint16_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0002;
-     *(volatile uint16_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0004;
-     *(volatile uint16_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0008;
-     *(volatile uint32_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0010;
-     *(volatile uint16_t*)(parlcd_mem_base + PARLCD_REG_DATA_o) = 0x0020;
-
-     clock_nanosleep(CLOCK_MONOTONIC, 0, &loop_delay, NULL);
-  }
-  //printf("reset je %d \n",rgb_knobs_value <<15);
-  if((rgb_knobs_value & 0x1f) > 32){
-  break;
-  }
-  }//konci WHILE
   grafclear(0xf);
-  //writeLetter(53, 120, 120); 
   
   printf("Hello world\n");
-  //writeText("extremne dlouhy text, ktery urcite musi vypsat na vice nez jeden radek, aspon doufam teda", 120,120);
   
-  //added writing units
   	int it = 0;
-	char unit[11];
-	while(!redPushed((int) rgb_knobs_value) && !bluePushed((int) rgb_knobs_value)){
+	char unit[16];
+	struct Unit list[NoUnits];
+	
+	while(!redPushed((int) rgb_knobs_value) && !bluePushed((int) rgb_knobs_value) && !greenPushed((int) rgb_knobs_value)){
+		rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
+		
 		for(it = 0; it < NoUnits; it++){
 			sprintf(unit, "Jednotka %d", it+1);
-			writeText(unit, 0, it*16);
+			list[it].number = it+1;
+			strcpy(list[it].name, unit);
+			list[it].ceiling = rgb_knobs_value;
+			list[it].wall = rgb_knobs_value;
+			writeText(list[it].name, 0, it*16);
 		}
+		
 		writeText("Pridat jednotku", 0, it*16);
 		grafShow();
-		sleep(4);
+		sleep(1);
 	}
 	
 	printf("Goodbye world\n");
