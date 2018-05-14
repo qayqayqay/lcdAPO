@@ -19,12 +19,13 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
-#include "display.h"
 #include <string.h>
 
+#include "display.h"
 #include "mzapo_parlcd.h"
 #include "mzapo_phys.h"
 #include "mzapo_regs.h"
+#include "knob.h"
 
 unsigned char *parlcd_mem_base;
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
   int i, j, offX, offY;
   unsigned c;
   int NoUnits = 4;
-  int selection;
+  //int selection = 1;
 
   unsigned char *mem_base;
 
@@ -107,17 +108,19 @@ int main(int argc, char *argv[])
   //writeText("extremne dlouhy text, ktery urcite musi vypsat na vice nez jeden radek, aspon doufam teda", 120,120);
   
   //added writing units
-  int it;
-  char unit[11];
-  for(it = 0; it < NoUnits; it++){
-	  sprintf(unit, "Jednotka %d", it+1);
-	  writeText(unit, 0, it*16);
-  }
-  writeText("Pridat jednotku", 0, it*16);
-  grafShow();
-  sleep(4);
-
-  printf("Goodbye world\n");
+  	int it = 0;
+	char unit[11];
+	while(!redPushed((int) rgb_knobs_value) && !bluePushed((int) rgb_knobs_value)){
+		for(it = 0; it < NoUnits; it++){
+			sprintf(unit, "Jednotka %d", it+1);
+			writeText(unit, 0, it*16);
+		}
+		writeText("Pridat jednotku", 0, it*16);
+		grafShow();
+		sleep(4);
+	}
+	
+	printf("Goodbye world\n");
 
   return 0;
 }
