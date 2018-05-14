@@ -12,7 +12,9 @@
 #include "mzapo_regs.h"
 #include "font_types.h"
 uint16_t grafika[320][480];
-
+uint16_t sectorUnit[320][160];
+uint16_t sectorOptions[320][160];
+uint16_t sectorParams[320][160];
 uint16_t LETTER = 0x0000;
 uint16_t BCG = 0xffff;
 
@@ -26,6 +28,7 @@ for (i = 0; i < 320 ; i++) {
 
 void grafShow(){
 	int i,j;
+	grafika = sectorUnit+sectorOptions + sectorParams; 
 	for (i = 0; i < 320 ; i++) {
 		for (j = 0; j < 480 ; j++) {
 			parlcd_write_data(parlcd_mem_base, grafika[i][j]);
