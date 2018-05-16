@@ -19,15 +19,15 @@ int blueRaw(int rgb);
 int greenRaw(int rgb);*/
 
 int red(int rgb){
-	return (rgb>>16 & 0xff)/4;
+	return (rgb>>16 & 0xff);
 }
 
 int blue(int rgb){
-	return (rgb & 0xff)/4;
+	return (rgb & 0xff);
 }
 
 int green(int rgb){
-	return (rgb>>8 & 0xff)/4;
+	return (rgb>>8 & 0xff);
 }
 
 
