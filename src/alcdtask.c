@@ -42,7 +42,7 @@ void fillBasicUnit(Unit *u){			//new void; uint32_t jako parametr pro ikonu jedn
 				if(i == j || i + j == 15){
 					u->graphics[i][j] = BLACK;
 				} else if(i < j && i + j < 15){
-					u->graphics[i][j] = u.ceiling;
+					u->graphics[i][j] = 0x1fff;
 				} else {
 					u->graphics[i][j] = 0x1fff;
 				}
