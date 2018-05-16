@@ -13,7 +13,7 @@
  *******************************************************************/
 
 #define _POSIX_C_SOURCE 200112L
-
+#define _BSD_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -75,17 +75,19 @@ int main(int argc, char *argv[])
   //int i, j, offX, offY;
   //unsigned c;
   int NoUnits = 4;
-  selection = 1;				//pdkaz na vybranou jednotku
+  /*selection = 1;				//pdkaz na vybranou jednotku
   sector = 1;					//odkaz na sektor, ve kterem se uzivatel pohybuje
   selected = -1;
-  uint32_t rgb_knobs_value;
-
+  */
   unsigned char *mem_base;
 
   mem_base = map_phys_address(SPILED_REG_BASE_PHYS, SPILED_REG_SIZE, 0);
   
   parlcd_mem_base = map_phys_address(PARLCD_REG_BASE_PHYS, PARLCD_REG_SIZE, 0);
 
+  uint32_t rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
+
+  
   if (parlcd_mem_base == NULL)
     exit(1);
 
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
 
   parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-  grafclear(0xf);
+  //grafclear(0xffff);
   
   printf("Hello world\n");
   
@@ -101,8 +103,12 @@ int main(int argc, char *argv[])
 	char unit[16];
 	Unit list[20]; // =(* Unit) malloc(sizeof(Unit)*NoUnits);		//pozn. vyresit alokaci a realokaci pameti pro dynamiku jednotek
 	
-	while(!redPushed((int) rgb_knobs_value) && !bluePushed((int) rgb_knobs_value) && !greenPushed((int) rgb_knobs_value)){
-	
+	while(1){
+		grafclear(0xff);
+		if (redPushed((int) rgb_knobs_value) && bluePushed((int) rgb_knobs_value) && greenPushed((int) rgb_knobs_value)){
+		break;
+		}
+		
 	
 		rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
 	
@@ -218,7 +224,7 @@ int main(int argc, char *argv[])
 	}
 		
 		grafShow();
-		sleep(1);
+		usleep(100000);
 	}
 	
 	printf("Goodbye world\n");

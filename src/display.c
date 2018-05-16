@@ -12,8 +12,11 @@
 #include "mzapo_regs.h"
 #include "font_types.h"
 #include "unit.h"
+#include "display.h"
 
-
+int selection = 1;
+int selected = -1;
+int sector = 1;
 uint16_t grafika[320][480];
 uint16_t sectorUnit[320][160];
 uint16_t sectorOptions[320][160];
@@ -45,18 +48,20 @@ void grafShow(){
 	for (i = 0; i < 320 ; i++) {
 		for (j = 0; j < 480 ; j++) {
 			
-			if((i > 16*(selection-1) && j > (sector-1)*160) && (i < 16*(selection) && j < (sector)*160	//new; invertuje text a pozadi na vyberu jed
+			if((i > 16*(selection-1) && j > (sector-1)*160) && (i < 16*(selection) && j < (sector)*160)){	//new; invertuje text a pozadi na vyberu jed
 				if(grafika[i][j] == LETTER){
 					grafika[i][j] = BCG;
 				} else {
 					grafika[i][j] = LETTER;
+				}
 			}
 			if(selected > 0){
-				if((i > 16*selected && j > sector*160) && (i < 16*(selected + 1) && j < (sector + 1)*160	//new; invertuje text a pozadi na vyberu jed
+				if((i > 16*selected && j > sector*160) && (i < 16*(selected + 1) && j < (sector + 1)*160)){	//new; invertuje text a pozadi na vyberu jed
 					if(grafika[i][j] == LETTER){
 						grafika[i][j] = BCG;
 					} else {
 						grafika[i][j] = SELECTED;
+					}
 				}
 			}
 
@@ -64,7 +69,8 @@ void grafShow(){
 			parlcd_write_data(parlcd_mem_base, grafika[i][j]);
 		}
 	}
-}
+ }
+
 
 int writeLetter(int ascii, int posX, int posY){
 		int start = (ascii - 32)*16;
