@@ -1,0 +1,33 @@
+Zmeny behem "late night show":
+	- snaha ovladat vyber + sektor vykresleni pres tlacitka v souborech "display.c" a "display.h"
+	- vykresleni jednotlivych polozek menu vyberu
+	- vytvoreni netrivialni ikony 16x16 pro kazdou jednotku (bude se posilat jako pole[256] nebo pole2D[16][16]?)
+
+K dodelani:
+	- nastaveni barvy osvetleni
+	- UDP komunikace
+
+
+BODOVANI
+	- vypsani jednotek na displej [2b] - DONE
+	- vyber jednotky otocnym volicem [1b] - na stisknuti, ale DONE
+	- zobrazeni menu vybrane jednotky [1b] - almost DONE
+	- inkrementalni nastaveni svetla jednotky [1b] (UDP nebo aspon vypsat hodnoty na terminal)
+	- prijem zpravy typu 1/2 [2b] (UDP)
+	- periodicke odesilan zprav a ikony [1b]
+	- dynamicke vytvareni jednotek [2b] - DONE (almost)
+	- zobrazeni aktualniho nastaveni vybrane jednotky [1b]
+	- vypnuti svetel [1b]
+	- plne zapnuti (vyber z 16ti preddefinovanych barev) [2b]
+	- zobrazeni ikony v seznamu aktivnich jednotek [1b] (neni to same jako vypsani jednotek??)
+	- netrivialni ikona jednotky [1b] - DONE
+	- uzivatelska prirucka [2b]
+	- technicka dokumentace [2b]
+
+
+NOTES:
+	- poradi tlacitek R G B:
+		- R - pozice
+		- G select
+		- B + pozice
+		- R+G+B vypnuti
