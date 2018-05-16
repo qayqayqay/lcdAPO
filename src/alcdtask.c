@@ -13,7 +13,7 @@
  *******************************************************************/
 
 #define _POSIX_C_SOURCE 200112L
-#define _BSD_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -31,14 +31,6 @@
 unsigned char *parlcd_mem_base;
 
 uint16_t BLACK = 0xffff;			//mozna je to bila, kdovi... kazdopadne tady bude cerna
-
-/*extern struct {
-	int number;
-	char name[16];
-	uint32_t ceiling;
-	uint32_t wall;
-	uint16_t graphics[16][16];
-} Unit;*/
 
 void fillBasicUnit(Unit u, uint32_t cl, uint32_t wall){			//new void; uint32_t jako parametr pro ikonu jednotky, ktera ma uint16_t? mozna bude nutnost upravy
 	int i, j;
@@ -72,13 +64,9 @@ void fillBasicUnit(Unit u, uint32_t cl, uint32_t wall){			//new void; uint32_t j
 int main(int argc, char *argv[])
 {
 	
-  //int i, j, offX, offY;
-  //unsigned c;
+  
   int NoUnits = 4;
-  /*selection = 1;				//pdkaz na vybranou jednotku
-  sector = 1;					//odkaz na sektor, ve kterem se uzivatel pohybuje
-  selected = -1;
-  */
+  
   unsigned char *mem_base;
 
   mem_base = map_phys_address(SPILED_REG_BASE_PHYS, SPILED_REG_SIZE, 0);
@@ -163,7 +151,14 @@ int main(int argc, char *argv[])
 							break;
 						}
 						case 2:{
-							//delete
+							for(int i = selected -1; i < NoUnits; i++){
+								list[i] = list[i+1];
+							
+							}
+							NoUnits--;
+							sector = 1;
+							selected = -1;
+							selection = 1;
 							break;
 						}
 						case 3:{

@@ -55,8 +55,12 @@ void grafShow(){
 					grafika[i][j] = LETTER;
 				}
 			}
+			
+			
+			
 			if(selected > 0){
-				if((i > 16*selected && j > sector*160) && (i < 16*(selected + 1) && j < (sector + 1)*160)){	//new; invertuje text a pozadi na vyberu jed
+				if((i > 16*(selected-1) && j > 0) && (i < 16*(selected ) && j < 160)){	//new; invertuje text a pozadi na vyberu jed
+					
 					if(grafika[i][j] == LETTER){
 						grafika[i][j] = BCG;
 					} else {
