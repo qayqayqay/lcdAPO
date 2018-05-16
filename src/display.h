@@ -22,6 +22,7 @@ extern void grafclear(unsigned char c);
 extern void grafShow();
 
 extern void getIcon(Unit u);
+extern void drawCircle(uint32_t color, int radius, int x, int y);
 
 
 extern int writeLetter(int ascii, int posX, int posY);

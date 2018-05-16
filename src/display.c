@@ -13,6 +13,7 @@
 #include "font_types.h"
 #include "unit.h"
 #include "display.h"
+#include "knob.h"
 
 int selection = 1;
 int selected = -1;
@@ -108,3 +109,22 @@ void  writeText(char text[], int posX, int posY){
 	
 	}	
 }
+
+void drawCircle(uint32_t color, int radius, int x, int y){
+	
+	for (int i = 0; i < 320 ; i++) {
+		for (int j = 0; j < 480 ; j++) {
+			if(((i-x)*(i-x) + (j-y)*(j-y)) < (radius+2)*(radius+2)){
+				grafika[i][j] = 0x0;
+			}
+			if( ((i-x)*(i-x) + (j-y)*(j-y)) < radius*radius  ){
+			uint16_t R = (uint16_t)(red(color) >> 3) & 0xff;
+			uint16_t G = (uint16_t)(green(color) >> 2) & 0xff;
+			uint16_t B = (uint16_t)(blue(color) >> 3) & 0xff;
+			grafika[i][j] = (R << 11) + (G << 5) + (B) ;
+			
+			//grafika[i][j] = 0x1fff;
+			}
+		}
+	}
+	}
