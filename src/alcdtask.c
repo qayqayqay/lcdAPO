@@ -12,10 +12,12 @@
 
  *******************************************************************/
 
+#define _XOPEN_SOURCE 500
 #define _POSIX_C_SOURCE 200112L
 #define  SECTOR_SIZE_2  3
 #define  SECTOR_SIZE_3  5
 #define  RADIUS 20
+#define  NUMBER_OF_COLORS 16
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -33,6 +35,9 @@
 unsigned char *parlcd_mem_base;
 
 uint16_t BLACK = 0x00;			//mozna je to bila, kdovi... kazdopadne tady bude cerna
+
+const uint32_t COLORS[16] ={0xffffff,0xccffff,0x33ccff,0x00cc66,0x000099,0x0000ff,0x00ff00,0x005500,
+	0xff66ff,0x660066,0xff0000,0xffa500,0xffff00,0x800000,0xaaaaaa,0x000000}; 
 
 void fillBasicUnit(Unit *u){			//new void; uint32_t jako parametr pro ikonu jednotky, ktera ma uint16_t? mozna bude nutnost upravy
 	int i, j;
@@ -99,7 +104,10 @@ int main(int argc, char *argv[])
     
   	int it = 0;
 	char unit[16];
-	Unit list[20]; // =(* Unit) malloc(sizeof(Unit)*NoUnits);		//pozn. vyresit alokaci a realokaci pameti pro dynamiku jednotek
+	//Unit list[20]; // =(* Unit) malloc(sizeof(Unit)*NoUnits);		//pozn. vyresit alokaci a realokaci pameti pro dynamiku jednotek
+	
+	Unit* list = (Unit *) malloc(sizeof(Unit)*4);
+
 	char strop[30];
 	uint32_t color = 0x0;
 	char zed[30];
@@ -143,6 +151,8 @@ int main(int argc, char *argv[])
 		writeText("Stena", 320,16);
 		writeText("Vypnout",320, 32);
 		writeText("Zapnout",320,48);
+		//writeText("Strop preset",320,64);
+		//writeText("Zed preset",320,80);
 		writeText("Zpet",320,64);
 		
 		int r = red(list[selection-1].ceiling);
@@ -211,6 +221,7 @@ int main(int argc, char *argv[])
 						selection = 1;
 					} else {
 						NoUnits++;
+						list = (Unit *)realloc(list, sizeof(Unit *)* NoUnits);
 					}
 					break;
 				}
@@ -223,6 +234,7 @@ int main(int argc, char *argv[])
 						case 2:{
 							for(int i = selected -1; i < NoUnits; i++){   // V mallocku freealloc( OLDUNIT)
 								list[i] = list[i+1];
+								list = (Unit *) realloc(list, sizeof(Unit *) * (NoUnits - 1));   // Unit removed realloc to shorter array
 							
 							}
 							NoUnits--;
@@ -291,9 +303,88 @@ int main(int argc, char *argv[])
 							selection = 1;
 							break;
 						}
+						case 6:{
+							//premade colours ceiling
+							int selectedColor = 0;
+							while(1){
+								grafclear(0xff);
+								writeText("Vyberte z prednastavenych barev osvetleni stropu",20,20);
+								int count = 0;
+								
+								for (int i = 0; i < NUMBER_OF_COLORS; ++i)
+								{
+									if(count == (selectedColor)){                    //HIGHLIGHT selected color
+										drawCircle(0x0,RADIUS + 5,(i*52)%480 ,80*(count % 8));
+									}
+									drawCircle(COLORS[i],RADIUS, (i*52)%480 ,80*(count % 8));
+									count++;	
+								}
+								if(redPushed((int) rgb_knobs_value)){
+									selectedColor = (selectedColor - 1) % 16;
+									if(selectedColor < 0){
+										selectedColor += 16;
+									}
+								} else {
+									if(greenPushed((int) rgb_knobs_value)){
+										list[selected -1].ceiling = COLORS[selectedColor];
+										break;    // WILL THIS BREAK OUT OF THE WHILE????
+									} else {
+									if(bluePushed((int) rgb_knobs_value)){
+										selectedColor = (selectedColor + 1) % 16;
+										if(selectedColor > 15){
+											selectedColor -= 16;
+										}	
+									}
+									}
+								}
+								usleep(100000);
+								grafShow();
+							}
+							break;
+						}
+						case 7:{
+							//premade colours wall
+							int selectedColor = 0;
+							while(1){
+								grafclear(0xff);
+								writeText("Vyberte z prednastavenych barev osvetleni steny",20,20);
+								int count = 0;
+								
+								for (int i = 0; i < NUMBER_OF_COLORS; ++i)
+								{
+									if(count == (selectedColor)){                    //HIGHLIGHT selected color
+										drawCircle(0x0,RADIUS + 5,(i*52)%480 ,80*(count % 8));
+									}
+									drawCircle(COLORS[i],RADIUS, (i*52)%480 ,80*(count % 8));
+									count++;	
+								}
+								if(redPushed((int) rgb_knobs_value)){
+									selectedColor = (selectedColor - 1) % 16;
+									if(selectedColor < 0){
+										selectedColor += 16;
+									}
+								} else {
+									if(greenPushed((int) rgb_knobs_value)){
+										list[selected -1].wall = COLORS[selectedColor];
+										break;    // WILL THIS BREAK OUT OF THE WHILE????
+									} else {
+									if(bluePushed((int) rgb_knobs_value)){
+										selectedColor = (selectedColor + 1) % 16;
+										if(selectedColor > 15){
+											selectedColor -= 16;
+										}	
+									}
+									}
+								}
+								usleep(100000);
+								grafShow();
+							}
+							break;
+						}
 					}
 					break;
 				}
+
 			}
 			
 			
@@ -335,6 +426,6 @@ int main(int argc, char *argv[])
 	}
 	
 	printf("Goodbye world\n");
-
+  free(list);
   return 0;
 }
