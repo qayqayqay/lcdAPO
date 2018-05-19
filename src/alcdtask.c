@@ -15,7 +15,7 @@
 #define _XOPEN_SOURCE 500
 #define _POSIX_C_SOURCE 200112L
 #define  SECTOR_SIZE_2  3
-#define  SECTOR_SIZE_3  5
+#define  SECTOR_SIZE_3  7 //5 -> 7
 #define  RADIUS 20
 #define  NUMBER_OF_COLORS 16
 #include <stdlib.h>
@@ -151,9 +151,9 @@ int main(int argc, char *argv[])
 		writeText("Stena", 320,16);
 		writeText("Vypnout",320, 32);
 		writeText("Zapnout",320,48);
-		//writeText("Strop preset",320,64);
-		//writeText("Zed preset",320,80);
-		writeText("Zpet",320,64);
+		writeText("Strop preset",320,64);
+		writeText("Zed preset",320,80);
+		writeText("Zpet",320,96);
 		
 		int r = red(list[selection-1].ceiling);
 		int g = green(list[selection-1].ceiling);
@@ -298,12 +298,12 @@ int main(int argc, char *argv[])
 							list[selected - 1].wall = 0xffffff;
 							break;
 						}
-						case 5:{
+						case 7:{
 							sector--;
 							selection = 1;
 							break;
 						}
-						case 6:{
+						case 5:{
 							//premade colours ceiling
 							int selectedColor = 0;
 							while(1){
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
 							}
 							break;
 						}
-						case 7:{
+						case 6:{
 							//premade colours wall
 							int selectedColor = 0;
 							while(1){

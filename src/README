@@ -1,3 +1,8 @@
+Vytvorena nva BRANCH dynamic
+	-obsahuje dynamickou alokaci listu jednotek (Alokace se zkompiluje otazka jestli bude fungovat na desce)
+	-pridany nove 2 volby do sektoru 3 pro vyber z prednastavenych barev (vyvari nove menu je potreba testovat)
+
+
 Zmeny behem "late night show":
 	- snaha ovladat vyber + sektor vykresleni pres tlacitka v souborech "display.c" a "display.h"
 	- vykresleni jednotlivych polozek menu vyberu
