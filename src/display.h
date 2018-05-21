@@ -15,6 +15,8 @@ extern int selected;		//new; oznaceni KONKRETNI jednotky, ktera je vybrana jedno
 
 extern int sector;			//new; ukazatel na konkretni ze tri sektoru
 
+extern int choosingPreset;
+
 extern uint16_t grafika[320][480];
 
 extern void grafclear(unsigned char c);

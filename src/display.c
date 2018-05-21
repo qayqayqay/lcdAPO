@@ -18,6 +18,7 @@
 int selection = 1;
 int selected = -1;
 int sector = 1;
+int choosingPreset = 0;
 uint16_t grafika[320][480];
 uint16_t sectorUnit[320][160];
 uint16_t sectorOptions[320][160];
@@ -49,6 +50,8 @@ void grafShow(){
 	for (i = 0; i < 320 ; i++) {
 		for (j = 0; j < 480 ; j++) {
 			
+			if(choosingPreset == 0){
+			
 			if((i > 16*(selection-1) && j > (sector-1)*160) && (i < 16*(selection) && j < (sector)*160)){	//new; invertuje text a pozadi na vyberu jed
 				if(grafika[i][j] == LETTER){
 					grafika[i][j] = BCG;
@@ -68,6 +71,8 @@ void grafShow(){
 						grafika[i][j] = SELECTED;
 					}
 				}
+			}
+			
 			}
 
 			
