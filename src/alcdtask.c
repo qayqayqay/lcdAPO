@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
   int newR = 0;
   int newG = 0;
   int newB = 0;
+  int highestID = 4;
   
   int NoUnits = 4;
   
@@ -220,8 +221,23 @@ int main(int argc, char *argv[])
 						selected = selection;
 						selection = 1;
 					} else {
-						NoUnits++;
-						list = (Unit *)realloc(list, sizeof(Unit *)* NoUnits);
+						if(NoUnits < 19){
+							NoUnits++;
+							if(NoUnits == 1){
+							list = (Unit *) malloc(sizeof(Unit));
+							highestID = 0;
+							} else {
+							list = (Unit *)realloc(list, sizeof(Unit)* NoUnits);
+							}
+							highestID++;
+							sprintf(unit, "Jednotka %d", highestID);
+							list[NoUnits-1].number = highestID;
+							strcpy(list[NoUnits-1].name, unit);
+							list[NoUnits-1].ceiling = rgb_knobs_value;
+							list[NoUnits-1].wall = rgb_knobs_value;
+							fillBasicUnit(&list[NoUnits-1]);			//new; fills all basic units
+							writeText(list[NoUnits-1].name, 0, (NoUnits-1)*16);
+						}
 					}
 					break;
 				}
@@ -232,11 +248,14 @@ int main(int argc, char *argv[])
 							break;
 						}
 						case 2:{
-							for(int i = selected -1; i < NoUnits; i++){   // V mallocku freealloc( OLDUNIT)
+							for(int i = selected - 1; i < NoUnits; i++){   // V mallocku freealloc( OLDUNIT)
 								list[i] = list[i+1];
-								list = (Unit *) realloc(list, sizeof(Unit *) * (NoUnits - 1));   // Unit removed realloc to shorter array
-							
 							}
+							if(NoUnits -1 > 0){
+							list = (Unit *) realloc(list, sizeof(Unit) * (NoUnits - 1));   // Unit removed realloc to shorter array
+							} else { 
+								free(list); 
+								}
 							NoUnits--;
 							sector = 1;
 							selected = -1;
@@ -306,79 +325,99 @@ int main(int argc, char *argv[])
 						case 5:{
 							//premade colours ceiling
 							int selectedColor = 0;
+							choosingPreset = 1;
 							while(1){
+								rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
+
+								if(greenPushed((int) rgb_knobs_value) && redPushed((int) rgb_knobs_value)){
+										list[selected -1].ceiling = COLORS[selectedColor];
+										
+										break;    // WILL THIS BREAK OUT OF THE WHILE????
+									}
 								grafclear(0xff);
-								writeText("Vyberte z prednastavenych barev osvetleni stropu",20,20);
+								writeText("Vyberte z prednastavenych barev osvetleni stropu, vyber potvrdte zmackunit zeleneho a cerveneho tlacitka",20,20);
 								int count = 0;
 								
 								for (int i = 0; i < NUMBER_OF_COLORS; ++i)
 								{
 									if(count == (selectedColor)){                    //HIGHLIGHT selected color
-										drawCircle(0x0,RADIUS + 5,(i*52)%480 ,80*(count % 8));
+										drawCircle(0x0,RADIUS + 5,100 + 80*(count / 8),((count/8) == 0) ? ((i+1)*30) : ((i-8+1)*30));
 									}
-									drawCircle(COLORS[i],RADIUS, (i*52)%480 ,80*(count % 8));
+									drawCircle(COLORS[i],RADIUS, 100 + 80*(count / 8),((count/8) == 0) ? ((i+1)*30) : ((i-8+1)*30));
 									count++;	
 								}
-								if(redPushed((int) rgb_knobs_value)){
-									selectedColor = (selectedColor - 1) % 16;
-									if(selectedColor < 0){
-										selectedColor += 16;
-									}
-								} else {
-									if(greenPushed((int) rgb_knobs_value)){
+								if(greenPushed((int) rgb_knobs_value) && redPushed((int) rgb_knobs_value)){
 										list[selected -1].ceiling = COLORS[selectedColor];
 										break;    // WILL THIS BREAK OUT OF THE WHILE????
-									} else {
-									if(bluePushed((int) rgb_knobs_value)){
-										selectedColor = (selectedColor + 1) % 16;
-										if(selectedColor > 15){
-											selectedColor -= 16;
-										}	
-									}
-									}
+								} else {
+										if(redPushed((int) rgb_knobs_value)){
+											selectedColor = (selectedColor - 1) % 16;
+											if(selectedColor < 0){
+											selectedColor += 16;
+											}
+										} else {
+											if(bluePushed((int) rgb_knobs_value)){
+											selectedColor = (selectedColor + 1) % 16;
+											if(selectedColor > 15){
+												selectedColor -= 16;
+											}	
+											}
+										}
 								}
-								usleep(100000);
 								grafShow();
+								
+								usleep(100000);
 							}
+							choosingPreset = 0;
 							break;
 						}
 						case 6:{
 							//premade colours wall
 							int selectedColor = 0;
+							choosingPreset = 1;
 							while(1){
+								rgb_knobs_value = *(volatile uint32_t*)(mem_base + SPILED_REG_KNOBS_8BIT_o);
+
+								if(greenPushed((int) rgb_knobs_value) && redPushed((int) rgb_knobs_value)){
+										list[selected -1].wall = COLORS[selectedColor];
+										
+										break;    // WILL THIS BREAK OUT OF THE WHILE????
+									}
 								grafclear(0xff);
-								writeText("Vyberte z prednastavenych barev osvetleni steny",20,20);
+								writeText("Vyberte z prednastavenych barev osvetleni stropu, vyber potvrdte zmackunit zeleneho a cerveneho tlacitka",20,20);
 								int count = 0;
 								
 								for (int i = 0; i < NUMBER_OF_COLORS; ++i)
 								{
 									if(count == (selectedColor)){                    //HIGHLIGHT selected color
-										drawCircle(0x0,RADIUS + 5,(i*52)%480 ,80*(count % 8));
+										drawCircle(0x0,RADIUS + 5,100 + 80*(count / 8),((count/8) == 0) ? ((i+1)*30) : ((i-8+1)*30));
 									}
-									drawCircle(COLORS[i],RADIUS, (i*52)%480 ,80*(count % 8));
+									drawCircle(COLORS[i],RADIUS, 100 + 80*(count / 8),((count/8) == 0) ? ((i+1)*30) : ((i-8+1)*30));
 									count++;	
 								}
-								if(redPushed((int) rgb_knobs_value)){
-									selectedColor = (selectedColor - 1) % 16;
-									if(selectedColor < 0){
-										selectedColor += 16;
-									}
-								} else {
-									if(greenPushed((int) rgb_knobs_value)){
+								if(greenPushed((int) rgb_knobs_value) && redPushed((int) rgb_knobs_value)){
 										list[selected -1].wall = COLORS[selectedColor];
 										break;    // WILL THIS BREAK OUT OF THE WHILE????
-									} else {
-									if(bluePushed((int) rgb_knobs_value)){
-										selectedColor = (selectedColor + 1) % 16;
-										if(selectedColor > 15){
-											selectedColor -= 16;
-										}	
-									}
-									}
+								} else {
+										if(redPushed((int) rgb_knobs_value)){
+											selectedColor = (selectedColor - 1) % 16;
+											if(selectedColor < 0){
+											selectedColor += 16;
+											}
+										} else {
+											if(bluePushed((int) rgb_knobs_value)){
+											selectedColor = (selectedColor + 1) % 16;
+											if(selectedColor > 15){
+												selectedColor -= 16;
+											}	
+											}
+										}
 								}
-								usleep(100000);
 								grafShow();
+								
+								usleep(100000);
 							}
+							choosingPreset = 0;
 							break;
 						}
 					}
