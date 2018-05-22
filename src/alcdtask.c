@@ -18,12 +18,19 @@
 #define  SECTOR_SIZE_3  7 //5 -> 7
 #define  RADIUS 20
 #define  NUMBER_OF_COLORS 16
+#define	 PORT 55555
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #include "display.h"
 #include "mzapo_parlcd.h"
@@ -33,11 +40,15 @@
 #include "unit.h"
 
 unsigned char *parlcd_mem_base;
+int cycleCount = 0;
 
 uint16_t BLACK = 0x00;			//mozna je to bila, kdovi... kazdopadne tady bude cerna
 
 const uint32_t COLORS[16] ={0xffffff,0xccffff,0x33ccff,0x00cc66,0x000099,0x0000ff,0x00ff00,0x005500,
 	0xff66ff,0x660066,0xff0000,0xffa500,0xffff00,0x800000,0xaaaaaa,0x000000}; 
+
+
+
 
 void fillBasicUnit(Unit *u){			//new void; uint32_t jako parametr pro ikonu jednotky, ktera ma uint16_t? mozna bude nutnost upravy
 	int i, j;
@@ -75,6 +86,42 @@ void fillBasicUnit(Unit *u){			//new void; uint32_t jako parametr pro ikonu jedn
 
 int main(int argc, char *argv[])
 {
+	
+	int sockfd;
+
+	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {					//creating socket and UDP comm
+        perror("socket");
+        exit(1);
+    }
+    
+    struct sockaddr_in bindaddr;
+
+	memset(&bindaddr, 0, sizeof(bindaddr));
+	bindaddr.sin_family = AF_INET;
+	bindaddr.sin_port = htons(PORT);
+	//bindaddr.sin_addr.s_addr = INADDR_ANY;
+	bindaddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+	int yes=1;
+
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                sizeof(yes)) == -1) {
+		perror("setsockopt (SO_REUSEADDR)");
+		exit(1);
+	}
+
+	if (bind(sockfd, (struct sockaddr *)&bindaddr, sizeof(bindaddr)) == -1) {
+		perror("bind");
+		exit(1);
+	}
+	
+	int broadcast = 1;
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast,
+        sizeof broadcast) == -1) {
+        perror("setsockopt (SO_BROADCAST)");
+        exit(1);
+    }
+	
   int changingSelected = 0;	
   int newR = 0;
   int newG = 0;
@@ -286,7 +333,10 @@ int main(int argc, char *argv[])
 							
 							/*
 							char tmp[50]
-							sprintf(tmp," Nove hdonoty jsou red = %d , green = %d, blue = %d",newR ,newG ,newB);
+					
+    [2b] za uživatelskou příručku
+    [2b] za technickou zprávu
+		sprintf(tmp," Nove hdonoty jsou red = %d , green = %d, blue = %d",newR ,newG ,newB);
 							writeText(tmp,170,210);
 							*/
 							
@@ -461,6 +511,51 @@ int main(int argc, char *argv[])
 			drawCircle(rgb_knobs_value,RADIUS,280,420);
 			}
 		grafShow();
+		
+		char nula[4]={0,0,0,0};
+		char jedna[4]={0,1,0,0};
+		char buf[548];
+		buf[0] = 'A';
+		buf[1] = 'L';
+		buf[2] = 'C';
+		buf[3] = '1';
+		
+		memcpy(&buf[4],jedna,sizeof(jedna));	// verze	
+		memcpy(&buf[8],nula,sizeof(nula)); // typ 0 - status
+		if(NoUnits > 0){
+			//memcpy(&buf[12],&list[0].ceiling,sizeof(uint32_t)); // strop
+			buf[12] = 0;
+			buf[13] = red(list[0].ceiling);
+			buf[14] = green(list[0].ceiling);
+			buf[15] = blue(list[0].ceiling);
+			//memcpy(&buf[16],&list[0].wall,sizeof(uint32_t)); // zed
+			buf[16] = 0;
+			buf[17] = red(list[0].wall);
+			buf[18] = green(list[0].wall);
+			buf[19] = blue(list[0].wall);
+			//buf[20] = "Jednotka test000";
+			memcpy(&buf[20],list[0].name,sizeof(list[0].name));
+		} else {
+			memcpy(&buf[12],nula,sizeof(uint32_t)); // strop
+			memcpy(&buf[16],nula,sizeof(uint32_t)); // zed
+
+			//buf[20] = "Jednotka test000";
+			memcpy(&buf[20],"Empty unit",sizeof("Empty unit"));
+		}
+		int i, j;
+		int count = 0;
+		for(i = 0; i < 16; i++){
+		for(j = 0; j < 16; j++){
+		count ++;
+		buf[36 + count] = 0;
+		}
+		}
+		
+		if(cycleCount > 10){
+		sendto(sockfd, &buf, sizeof(buf), 0, &bindaddr, sizeof(bindaddr));
+		cycleCount = 0;
+		}
+		cycleCount++;
 		usleep(100000);
 	}
 	
